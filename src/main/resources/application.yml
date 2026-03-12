@@ -1,0 +1,39 @@
+server:
+  port: 8084
+
+spring:
+  application:
+    name: appointmentservice
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/appointmentdb
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        default_schema: appointment
+
+  sql:
+    init:
+      mode: always
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+services:
+  patient:
+    base-url: http://localhost:8082
+  doctor:
+    base-url: http://localhost:8083
+  user:
+    base-url: http://localhost:8081
