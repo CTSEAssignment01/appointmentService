@@ -134,15 +134,17 @@ mvn spring-boot:run
 
 The service will start on http://localhost:8084.
 
-3. API Documentation
+### 3. API Documentation
+
 Swagger UI / OpenAPI documentation is built-in. Once the service is running, you can explore and test the available endpoints interactively at:
 
-Swagger UI: http://localhost:8084/swagger-ui.html (or http://localhost:8084/swagger-ui/index.html)
+* **Swagger UI:** [http://localhost:8084/swagger-ui.html](http://localhost:8084/swagger-ui.html) (or `http://localhost:8084/swagger-ui/index.html`)
+* **Health Check:** [http://localhost:8084/actuator/health](http://localhost:8084/actuator/health)
 
-Health Check: http://localhost:8084/actuator/health
+---
 
-Tech Stack
-Java: 17
-Framework: Spring Boot 4.0.3
-Database: PostgreSQL + Spring Data JPA (Hibernate)
-API Docs: Springdoc OpenAPI
+## Tech Stack
+* **Java:** 17
+* **Framework:** Spring Boot 4.0.3
+* **Database:** PostgreSQL + Spring Data JPA (Hibernate)
+* **API Docs:** Springdoc OpenAPI
