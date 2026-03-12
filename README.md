@@ -46,6 +46,7 @@ Content-Type: application/json
 
 Request body:
 
+```json
 {
   "appointmentDate": "2026-03-15",
   "startTime": "09:00",
@@ -57,9 +58,11 @@ Request body:
   "notes": "Patient requested morning slot",
   "status": "PENDING"
 }
+```
 
 Response (example):
 
+```json
 {
   "id": "uuid-of-appointment",
   "appointmentDate": "2026-03-15",
@@ -73,6 +76,17 @@ Response (example):
   "status": "CONFIRMED",
   "createdAt": "2026-03-12T12:00:00Z"
 }
+```
+
+---
+
+## Appointment Lifecycle
+
+```text
+PENDING ──payment success──► CONFIRMED
+PENDING ──payment failure──► FAILED (Releases Slot)
+CONFIRMED ──user cancels───► CANCELLED (Releases Slot)
+```
 
 ---
 
