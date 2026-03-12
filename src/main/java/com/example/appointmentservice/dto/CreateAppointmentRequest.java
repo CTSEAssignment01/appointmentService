@@ -11,16 +11,16 @@ import lombok.Setter;
 @Setter
 public class CreateAppointmentRequest {
 
-    @NotNull
+    @NotNull(message = "patientId is required")
     private UUID patientId;
 
-    @NotNull
+    @NotNull(message = "doctorId is required")
     private UUID doctorId;
 
-    @NotNull
+    @NotNull(message = "slotId is required")
     private UUID slotId;
 
-    @NotBlank
+    @NotBlank(message = "reason is required")
     private String reason;
 
     private String notes;
