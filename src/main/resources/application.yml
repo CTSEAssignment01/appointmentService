@@ -49,7 +49,7 @@ spring:
   sql:
     init:
       # Change to 'never' to let Hibernate (ddl-auto) manage the tables
-      mode: ${SPRING_SQL_INIT_MODE:always} # Ensures schema.sql and data.sql are always executed if this is 'always'
+      mode: ${SPRING_SQL_INIT_MODE:never} # Ensures schema.sql and data.sql are always executed if this is 'always'
 
 management:
   endpoints:
