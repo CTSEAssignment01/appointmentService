@@ -1,5 +1,6 @@
 package com.example.appointmentservice.dto;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -22,6 +23,11 @@ public class AppointmentResponse {
     private LocalTime endTime;
 
     private String status;
+    private String paymentStatus;
+    private UUID paymentTransactionId;
+    private String stripeSessionId;
+    private BigDecimal amount;
+    private String currency;
     private String reason;
     private String notes;
 

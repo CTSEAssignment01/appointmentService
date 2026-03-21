@@ -1,5 +1,6 @@
 package com.example.appointmentservice.model;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -50,6 +51,22 @@ public class Appointment {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private AppointmentStatus status;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private PaymentStatus paymentStatus;
+
+    @Column(nullable = true)
+    private UUID paymentTransactionId;
+
+    @Column(nullable = false)
+    private BigDecimal amount;
+
+    @Column(nullable = false)
+    private String currency;
+
+    @Column(length = 500)
+    private String stripeSessionId;
 
     @Column(length = 500)
     private String reason;
