@@ -9,13 +9,13 @@ import com.example.appointmentservice.dto.CreateAppointmentRequest;
 
 public interface AppointmentService {
 
-    AppointmentResponse createAppointment(CreateAppointmentRequest request);
+    AppointmentResponse createAppointment(CreateAppointmentRequest request, String authHeader);
 
     AppointmentResponse getAppointmentById(UUID id);
 
     List<AppointmentResponse> getAllAppointments();
 
-    AppointmentResponse cancelAppointment(UUID id);
+    AppointmentResponse cancelAppointment(UUID id, String authHeader);
 
     Map<String, Object> initiatePaymentSession(UUID appointmentId);
 
