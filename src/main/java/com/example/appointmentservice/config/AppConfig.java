@@ -24,8 +24,8 @@ public class AppConfig {
 
         HttpComponentsClientHttpRequestFactory factory = new HttpComponentsClientHttpRequestFactory(httpClient);
         // set factory-level timeouts (milliseconds)
-        factory.setConnectionRequestTimeout(5_000);
-        factory.setReadTimeout(5_000);
+        factory.setConnectionRequestTimeout(30_000);
+        factory.setReadTimeout(60_000);
 
         return new RestTemplate(factory);
         // // Configure timeouts for inter-service calls

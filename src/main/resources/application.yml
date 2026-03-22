@@ -28,9 +28,9 @@ spring:
     name: appointmentservice
 
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/appointmentdb}
-    username: ${SPRING_DATASOURCE_USERNAME:postgres}
-    password: ${SPRING_DATASOURCE_PASSWORD:postgres}
+    url: ${SPRING_DATASOURCE_URL:${DB_URL:jdbc:postgresql://localhost:5432/appointmentdb}}
+    username: ${SPRING_DATASOURCE_USERNAME:${DB_USERNAME:postgres}}
+    password: ${SPRING_DATASOURCE_PASSWORD:${DB_PASSWORD:postgres}}
     driver-class-name: org.postgresql.Driver
     hikari: # Using HikariCP for better performance
       maximum-pool-size: 5 # Added for stability
@@ -49,7 +49,7 @@ spring:
   sql:
     init:
       # Change to 'never' to let Hibernate (ddl-auto) manage the tables
-      mode: ${SPRING_SQL_INIT_MODE:never} # Ensures schema.sql and data.sql are always executed if this is 'always'
+      mode: ${SPRING_SQL_INIT_MODE:always} # Ensures schema.sql and data.sql are always executed if this is 'always'
 
 management:
   endpoints:
@@ -59,14 +59,14 @@ management:
 
 services:
   patient:
-    base-url: ${PATIENT_SERVICE_URL:http://localhost:8082}
+    base-url: ${PATIENT_SERVICE_URL:http://patient-service:8083}
   doctor:
-    base-url: ${DOCTOR_SERVICE_URL:http://localhost:8083}
+    base-url: ${DOCTOR_SERVICE_URL:http://doctor-service:8082}
   user:
-    base-url: ${USER_SERVICE_URL:http://localhost:8081}
+    base-url: ${USER_SERVICE_URL:http://user-service:8081}
   payment:
-    base-url: ${PAYMENT_SERVICE_URL:http://localhost:8080}
-    internal-api-key: ${PAYMENT_INTERNAL_API_KEY:c2tfaW50ZXJuYWFsX2I0YzI1N2Y4YThiNGQ1OGM5YzMxNWM0NWU3YWY1MzdkCg==}
+    base-url: ${PAYMENT_SERVICE_URL:http://payment-service:8085}
+    internal-api-key: ${PAYMENT_INTERNAL_API_KEY:clinic-internal-key}
 
 # services:
   # patient:

@@ -9,6 +9,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.RequiredArgsConstructor;
@@ -85,6 +86,7 @@ public class PaymentServiceClient {
         @JsonProperty("sessionId")
         public String sessionId;
         
+        @JsonAlias("url")
         @JsonProperty("checkoutUrl")
         public String checkoutUrl;
         
