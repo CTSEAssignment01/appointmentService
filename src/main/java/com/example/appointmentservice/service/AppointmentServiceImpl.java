@@ -3,9 +3,11 @@ package com.example.appointmentservice.service;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.appointmentservice.client.PaymentServiceClient;
 import com.example.appointmentservice.client.PaymentServiceClient.PaymentSessionRequest;
@@ -39,7 +41,8 @@ public class AppointmentServiceImpl implements AppointmentService {
     }
 
     @Override
-    public AppointmentResponse createAppointment(CreateAppointmentRequest request) {
+    @Transactional
+    public AppointmentResponse createAppointment(CreateAppointmentRequest request, String authHeader) {
         validateCreateRequest(request);
 
         if (appointmentRepository.existsBySlotIdAndStatus(request.getSlotId(), AppointmentStatus.CONFIRMED)) {
@@ -66,14 +69,42 @@ public class AppointmentServiceImpl implements AppointmentService {
         }
 
         Appointment appointment = new Appointment();
+        // Generate an appointment id so we can send it to doctor service when reserving
+        UUID appointmentId = UUID.randomUUID();
+        appointment.setId(appointmentId);
         appointment.setPatientId(request.getPatientId());
         appointment.setDoctorId(request.getDoctorId());
         appointment.setSlotId(request.getSlotId());
 
-        // Temporary values until doctorService integration is added
-        appointment.setAppointmentDate(LocalDate.now().plusDays(1));
-        appointment.setStartTime(LocalTime.of(10, 0));
-        appointment.setEndTime(LocalTime.of(10, 30));
+        // Reserve slot with doctor service before persisting
+        Map<String, Object> slotResp = null;
+        try {
+            slotResp = doctorServiceClient.reserveSlot(request.getSlotId(), authHeader, request.getPatientId(), appointmentId);
+            if (slotResp != null) {
+                // parse date/time if present
+                Object dateObj = slotResp.get("date");
+                Object startObj = slotResp.get("startTime");
+                Object endObj = slotResp.get("endTime");
+                try {
+                    if (dateObj != null) appointment.setAppointmentDate(LocalDate.parse(dateObj.toString()));
+                    if (startObj != null) appointment.setStartTime(LocalTime.parse(startObj.toString()));
+                    if (endObj != null) appointment.setEndTime(LocalTime.parse(endObj.toString()));
+                } catch (Exception e) {
+                    // fallback to defaults if parsing fails
+                    appointment.setAppointmentDate(LocalDate.now().plusDays(1));
+                    appointment.setStartTime(LocalTime.of(10, 0));
+                    appointment.setEndTime(LocalTime.of(10, 30));
+                }
+            } else {
+                // fallback values
+                appointment.setAppointmentDate(LocalDate.now().plusDays(1));
+                appointment.setStartTime(LocalTime.of(10, 0));
+                appointment.setEndTime(LocalTime.of(10, 30));
+            }
+        } catch (RuntimeException ex) {
+            // bubble up as slot reservation problem
+            throw new BadRequestException("Failed to reserve slot: " + ex.getMessage());
+        }
 
         appointment.setStatus(AppointmentStatus.PENDING);
         appointment.setPaymentStatus(PaymentStatus.NOT_INITIATED);
@@ -84,8 +115,18 @@ public class AppointmentServiceImpl implements AppointmentService {
         appointment.setReason(request.getReason());
         appointment.setNotes(request.getNotes());
 
-        Appointment saved = appointmentRepository.save(appointment);
-        return AppointmentMapper.toResponse(saved);
+        try {
+            Appointment saved = appointmentRepository.save(appointment);
+            return AppointmentMapper.toResponse(saved);
+        } catch (RuntimeException ex) {
+            // If save failed after reservation, release the slot
+            try {
+                doctorServiceClient.releaseSlot(appointment.getSlotId(), authHeader);
+            } catch (Exception releaseEx) {
+                // log and continue to rethrow original
+            }
+            throw ex;
+        }
     }
 
     @Override
@@ -105,7 +146,7 @@ public class AppointmentServiceImpl implements AppointmentService {
     }
 
     @Override
-    public AppointmentResponse cancelAppointment(UUID id) {
+    public AppointmentResponse cancelAppointment(UUID id, String authHeader) {
         Appointment appointment = appointmentRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Appointment not found with id: " + id));
 
@@ -114,6 +155,15 @@ public class AppointmentServiceImpl implements AppointmentService {
         }
 
         appointment.setStatus(AppointmentStatus.CANCELLED);
+
+        // release the reserved slot in doctor service (best-effort)
+        try {
+            if (appointment.getSlotId() != null) {
+                doctorServiceClient.releaseSlot(appointment.getSlotId(), authHeader);
+            }
+        } catch (Exception e) {
+            // ignore - best effort
+        }
 
         Appointment updated = appointmentRepository.save(appointment);
         return AppointmentMapper.toResponse(updated);
