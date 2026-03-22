@@ -1,36 +1,15 @@
-# server:
-#   port: 8084
-
-# spring:
-#   application:
-#     name: appointmentservice
-
-#   datasource:
-#     url: jdbc:postgresql://localhost:5432/appointmentdb
-#     username: postgres
-#     password: postgres
-#     driver-class-name: org.postgresql.Driver
-
-#   jpa:
-#     hibernate:
-#       ddl-auto: update
-#     show-sql: true
-#     properties:
-#       hibernate:
-#         format_sql: true
-#         default_schema: appointment
-
 server:
-  port: ${SERVER_PORT:8084}
+  port: 8080
 
 spring:
   application:
     name: appointmentservice
 
   datasource:
-    url: ${SPRING_DATASOURCE_URL:${DB_URL:jdbc:postgresql://localhost:5432/appointmentdb}}
-    username: ${SPRING_DATASOURCE_USERNAME:${DB_USERNAME:postgres}}
-    password: ${SPRING_DATASOURCE_PASSWORD:${DB_PASSWORD:postgres}}
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/appointmentdb}
+    username: ${SPRING_DATASOURCE_USERNAME:postgres.znguozjekkoaloymyjmf}
+    # username: ${SPRING_DATASOURCE_USERNAME:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD}
     driver-class-name: org.postgresql.Driver
     hikari: # Using HikariCP for better performance
       maximum-pool-size: 5 # Added for stability
@@ -65,24 +44,5 @@ services:
   user:
     base-url: ${USER_SERVICE_URL:http://user-service:8081}
   payment:
-    base-url: ${PAYMENT_SERVICE_URL:http://payment-service:8085}
-    internal-api-key: ${PAYMENT_INTERNAL_API_KEY:clinic-internal-key}
-
-# services:
-  # patient:
-  #   base-url: http://localhost:8082
-  # doctor:
-  #   base-url: http://localhost:8083
-  # user:
-  #   base-url: http://localhost:8081
-#   patient:
-#     base-url: ${PATIENT_SERVICE_URL:http://localhost:8082}
-#   doctor:
-#     base-url: ${DOCTOR_SERVICE_URL:http://localhost:8083}
-#   user:
-#     base-url: ${USER_SERVICE_URL:http://localhost:8081}
-#   payment:
-#     base-url: ${PAYMENT_SERVICE_URL:http://localhost:8085}
-    # payment:
-    #   base-url: ${PAYMENT_SERVICE_URL:http://localhost:8080}
-    #   internal-api-key: ${PAYMENT_INTERNAL_API_KEY:c2tfaW50ZXJuYWFsX2I0YzI1N2Y4YThiNGQ1OGM5YzMxNWM0NWU3YWY1MzdkCg==}
+    base-url: ${PAYMENT_SERVICE_URL:http://localhost:8080}
+    internal-api-key: ${PAYMENT_INTERNAL_API_KEY:c2tfaW50ZXJuYWFsX2I0YzI1N2Y4YThiNGQ1OGM5YzMxNWM0NWU3YWY1MzdkCg==}
