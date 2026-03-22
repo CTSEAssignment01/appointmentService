@@ -45,13 +45,17 @@ public class AppointmentServiceImpl implements AppointmentService {
     public AppointmentResponse createAppointment(CreateAppointmentRequest request, String authHeader) {
         validateCreateRequest(request);
 
+        if (appointmentRepository.existsBySlotId(request.getSlotId())) {
+            throw new BadRequestException("This slot already has an appointment");
+        }
+
         if (appointmentRepository.existsBySlotIdAndStatus(request.getSlotId(), AppointmentStatus.CONFIRMED)) {
             throw new BadRequestException("This slot is already confirmed");
         }
 
         // Validate patient & doctor exist in their respective services
         try {
-            var patient = patientServiceClient.getPatientById(request.getPatientId());
+            var patient = patientServiceClient.getPatientById(request.getPatientId(), authHeader);
             if (patient == null) {
                 throw new ResourceNotFoundException("Patient not found: " + request.getPatientId());
             }
@@ -60,7 +64,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         }
 
         try {
-            var doctor = doctorServiceClient.getDoctorById(request.getDoctorId());
+            var doctor = doctorServiceClient.getDoctorById(request.getDoctorId(), authHeader);
             if (doctor == null) {
                 throw new ResourceNotFoundException("Doctor not found: " + request.getDoctorId());
             }
@@ -69,9 +73,8 @@ public class AppointmentServiceImpl implements AppointmentService {
         }
 
         Appointment appointment = new Appointment();
-        // Generate an appointment id so we can send it to doctor service when reserving
-        UUID appointmentId = UUID.randomUUID();
-        appointment.setId(appointmentId);
+        // Use a temporary correlation id for slot reservation; JPA will generate appointment id on save.
+        UUID reservationCorrelationId = UUID.randomUUID();
         appointment.setPatientId(request.getPatientId());
         appointment.setDoctorId(request.getDoctorId());
         appointment.setSlotId(request.getSlotId());
@@ -79,7 +82,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         // Reserve slot with doctor service before persisting
         Map<String, Object> slotResp = null;
         try {
-            slotResp = doctorServiceClient.reserveSlot(request.getSlotId(), authHeader, request.getPatientId(), appointmentId);
+            slotResp = doctorServiceClient.reserveSlot(request.getSlotId(), authHeader, request.getPatientId(), reservationCorrelationId);
             if (slotResp != null) {
                 // parse date/time if present
                 Object dateObj = slotResp.get("date");

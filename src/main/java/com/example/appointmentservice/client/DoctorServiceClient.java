@@ -13,6 +13,7 @@ import io.github.resilience4j.retry.Retry;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
@@ -33,13 +34,21 @@ public class DoctorServiceClient {
         this.doctorRetry = doctorRetry;
     }
 
-    public DoctorDto getDoctorById(UUID id) {
+    public DoctorDto getDoctorById(UUID id, String authHeader) {
         String url = doctorServiceUrl + "/api/doctors/" + id;
         log.debug("Calling Doctor service: {}", url);
         try {
             java.util.function.Supplier<DoctorDto> supplier =
                     io.github.resilience4j.retry.Retry.decorateSupplier(doctorRetry,
-                            () -> restTemplate.getForObject(url, DoctorDto.class));
+                            () -> {
+                                HttpHeaders headers = new HttpHeaders();
+                                if (authHeader != null && !authHeader.isBlank()) {
+                                    headers.set("Authorization", authHeader);
+                                }
+                                HttpEntity<Void> entity = new HttpEntity<>(headers);
+                                ResponseEntity<DoctorDto> response = restTemplate.exchange(url, HttpMethod.GET, entity, DoctorDto.class);
+                                return response.getBody();
+                            });
             return supplier.get();
         } catch (Exception e) {
             log.error("Error calling Doctor service for id {}: {}", id, e.getMessage());
