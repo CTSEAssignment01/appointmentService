@@ -44,6 +44,8 @@ public class AppointmentController {
         return ResponseEntity.ok(appointmentService.getAppointmentById(id));
     }
 
+    // Testing 1233
+
     @GetMapping
     public ResponseEntity<List<AppointmentResponse>> getAllAppointments() {
         return ResponseEntity.ok(appointmentService.getAllAppointments());
